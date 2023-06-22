@@ -366,15 +366,18 @@ rtp_session_set_local_addr (RtpSession * session, const char * addr, int rtp_por
 		session->rtp.gs.sockfamily=sockfamily;
 		session->rtp.gs.socket=sock;
 		session->rtp.gs.loc_port=rtp_port;
-		/*try to bind rtcp port */
-		sock=create_and_bind(addr,&rtcp_port,&sockfamily,session->reuseaddr,&session->rtcp.gs.loc_addr,&session->rtcp.gs.loc_addrlen);
-		if (sock!=(ortp_socket_t)-1){
-			session->rtcp.gs.sockfamily=sockfamily;
-			session->rtcp.gs.socket=sock;
-			session->rtcp.gs.loc_port=rtcp_port;
-		}else {
-			ortp_error("Could not create and bind rtcp socket for session [%p]",session);
-			return -1;
+
+		if (!session->rtcp_mux) {
+			/*try to bind rtcp port */
+			sock=create_and_bind(addr,&rtcp_port,&sockfamily,session->reuseaddr,&session->rtcp.gs.loc_addr,&session->rtcp.gs.loc_addrlen);
+			if (sock!=(ortp_socket_t)-1){
+				session->rtcp.gs.sockfamily=sockfamily;
+				session->rtcp.gs.socket=sock;
+				session->rtcp.gs.loc_port=rtcp_port;
+			}else {
+				ortp_error("Could not create and bind rtcp socket for session [%p]",session);
+				return -1;
+			}
 		}
 
 		/* set socket options (but don't change chosen states) */
@@ -1543,12 +1546,12 @@ static void rtp_process_incoming_packet(RtpSession * session, mblk_t * mp, bool_
 			}
 		}
 	}
-	
-	/* store the sender RTP address to do symmetric RTP at start mainly for stun packets. 
+
+	/* store the sender RTP address to do symmetric RTP at start mainly for stun packets.
 	 * --For rtp packet symmetric RTP is handled in rtp_session_rtp_parse() after first valid rtp packet received.
 	 * --For rtcp, only swicth if valid rtcp packet && first rtcp packet received*/
 	rtp_session_update_remote_sock_addr(session,mp,is_rtp_packet,is_rtp_packet || (rtp_get_version(mp) != 2));
-	
+
 	if (is_rtp_packet){
 		if (session->use_connect && session->symmetric_rtp && !sock_connected ){
 			/* In the case where use_connect is false, */
@@ -1720,10 +1723,10 @@ int  rtp_session_update_remote_sock_addr(RtpSession * session, mblk_t * mp, bool
 	const char* socket_type;
 	bool_t sock_connected;
 	bool_t do_address_change = /*(rtp_get_version(mp) == 2 && */ !only_at_start;
-	
+
 	if (!rtp_session_get_symmetric_rtp(session))
 		return -1; /*nothing to try if not rtp symetric*/
-	
+
 	if (is_rtp) {
 		rem_addr = &session->rtp.gs.rem_addr;
 		rem_addrlen = session->rtp.gs.rem_addrlen;
@@ -1737,7 +1740,7 @@ int  rtp_session_update_remote_sock_addr(RtpSession * session, mblk_t * mp, bool
 		socket_type = "rtcp";
 		do_address_change = session->rtcp.gs.socket != (ortp_socket_t)-1  && (do_address_change || rtp_session_get_stats(session)->recv_rtcp_packets == 0);
 	}
-	
+
 	if (do_address_change
 		&& rem_addr
 		&& !sock_connected
@@ -1747,11 +1750,11 @@ int  rtp_session_update_remote_sock_addr(RtpSession * session, mblk_t * mp, bool
 		char current_port[12]={0};
 		char new_host[65]={0};
 		char new_port[12]={0};
-		
+
 		getnameinfo((const struct sockaddr *)rem_addr,rem_addrlen,current_host,sizeof(current_host)-1,current_port,sizeof(current_port)-1,NI_NUMERICHOST|NI_NUMERICSERV);
-		
+
 		getnameinfo((const struct sockaddr *)&mp->net_addr,mp->net_addrlen,new_host,sizeof(new_host)-1,new_port,sizeof(new_port)-1,NI_NUMERICHOST|NI_NUMERICSERV);
-		
+
 		ortp_message("Switching %s destination from [%s:%s] to [%s:%s] for session [%p]"
 			   , socket_type
 			   , current_host
@@ -1759,7 +1762,7 @@ int  rtp_session_update_remote_sock_addr(RtpSession * session, mblk_t * mp, bool
 			   , new_host
 			   , new_port
 			   , session);
-		
+
 		memcpy(rem_addr,&mp->net_addr,mp->net_addrlen);
 		return 0;
 	}
