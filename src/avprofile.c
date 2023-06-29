@@ -744,8 +744,7 @@ PayloadType payload_type_vp8={
 	FLAGS(PAYLOAD_TYPE_RTCP_FEEDBACK_ENABLED)
 };
 
-
-static PayloadType payload_type_vp9 = {
+PayloadType payload_type_vp9 = {
 	TYPE(PAYLOAD_VIDEO),
 	CLOCK_RATE(90000),
 	BITS_PER_SAMPLE(0),
@@ -760,7 +759,7 @@ static PayloadType payload_type_vp9 = {
 	FLAGS(PAYLOAD_TYPE_RTCP_FEEDBACK_ENABLED)
 };
 
-static PayloadType payload_type_av1 = {
+PayloadType payload_type_av1 = {
 	TYPE(PAYLOAD_VIDEO),
 	CLOCK_RATE(90000),
 	BITS_PER_SAMPLE(0),
@@ -1015,7 +1014,7 @@ PayloadType payload_type_codec2={
 	FLAGS(0)
 };
 
-static PayloadType payload_type_evs = {
+PayloadType payload_type_evs = {
 	TYPE(PAYLOAD_AUDIO_PACKETIZED),
 	CLOCK_RATE(16000),
 	BITS_PER_SAMPLE(0),
