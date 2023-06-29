@@ -162,6 +162,7 @@ ORTP_VAR_PUBLIC PayloadType payload_type_opus;
 ORTP_VAR_PUBLIC PayloadType payload_type_isac;
 ORTP_VAR_PUBLIC PayloadType payload_type_gsm_efr;
 ORTP_VAR_PUBLIC PayloadType payload_type_codec2;
+ORTP_VAR_PUBLIC PayloadType payload_type_evs;
 
 /* video */
 ORTP_VAR_PUBLIC PayloadType payload_type_mpv;
@@ -175,6 +176,8 @@ ORTP_VAR_PUBLIC PayloadType payload_type_h264;
 ORTP_VAR_PUBLIC PayloadType payload_type_x_snow;
 ORTP_VAR_PUBLIC PayloadType payload_type_jpeg;
 ORTP_VAR_PUBLIC PayloadType payload_type_vp8;
+ORTP_VAR_PUBLIC PayloadType payload_type_vp9;
+ORTP_VAR_PUBLIC PayloadType payload_type_av1;
 
 ORTP_VAR_PUBLIC PayloadType payload_type_g722;
 
