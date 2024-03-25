@@ -28,7 +28,7 @@
 #define HAVE_SYS_UIO_H 1
 /* #undef HAVE_SYS_AUDIO_H */
 #define HAVE_SYS_SHM_H 1
-/* #undef HAVE_ARC4RANDOM */
+#define HAVE_ARC4RANDOM 1
 
 /* #undef ORTP_BIGENDIAN */
 
