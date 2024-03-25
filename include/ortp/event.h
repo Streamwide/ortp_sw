@@ -25,7 +25,24 @@
 
 typedef mblk_t OrtpEvent;
 
-typedef unsigned long OrtpEventType;
+/* type is one of the following*/
+typedef enum {
+	ORTP_EVENT_STUN_PACKET_RECEIVED               = 1,
+	ORTP_EVENT_PAYLOAD_TYPE_CHANGED               = 2,
+	ORTP_EVENT_TELEPHONE_EVENT                    = 3,
+	ORTP_EVENT_RTCP_PACKET_RECEIVED               = 4, /**<when a RTCP packet is received from far end */
+	ORTP_EVENT_RTCP_PACKET_EMITTED                = 5, /**<fired when oRTP decides to send an automatic RTCP SR or RR */
+	ORTP_EVENT_ZRTP_ENCRYPTION_CHANGED            = 6,
+	ORTP_EVENT_ZRTP_SAS_READY                     = 7,
+	ORTP_EVENT_ICE_CHECK_LIST_PROCESSING_FINISHED = 8,
+	ORTP_EVENT_ICE_SESSION_PROCESSING_FINISHED    = 9,
+	ORTP_EVENT_ICE_GATHERING_FINISHED             = 10,
+	ORTP_EVENT_ICE_LOSING_PAIRS_COMPLETED         = 11,
+	ORTP_EVENT_ICE_RESTART_NEEDED                 = 12,
+	ORTP_EVENT_DTLS_ENCRYPTION_CHANGED            = 13,
+	ORTP_EVENT_TMMBR_RECEIVED                     = 14,
+} OrtpEventType;
+
 
 typedef enum {
 	OrtpRTPSocket,
@@ -33,6 +50,7 @@ typedef enum {
 } OrtpSocketType;
 
 struct _OrtpEventData{
+	OrtpEventType type;
 	mblk_t *packet;	/* most events are associated to a received packet */
 	struct sockaddr_storage source_addr;
 	socklen_t source_addrlen;
@@ -64,21 +82,6 @@ extern "C"{
 
 ORTP_PUBLIC OrtpEvent * ortp_event_new(OrtpEventType tp);
 ORTP_PUBLIC OrtpEventType ortp_event_get_type(const OrtpEvent *ev);
-/* type is one of the following*/
-#define ORTP_EVENT_STUN_PACKET_RECEIVED		1
-#define ORTP_EVENT_PAYLOAD_TYPE_CHANGED 	2
-#define ORTP_EVENT_TELEPHONE_EVENT		3
-#define ORTP_EVENT_RTCP_PACKET_RECEIVED		4 /**<when a RTCP packet is received from far end */
-#define ORTP_EVENT_RTCP_PACKET_EMITTED		5 /**<fired when oRTP decides to send an automatic RTCP SR or RR */
-#define ORTP_EVENT_ZRTP_ENCRYPTION_CHANGED	6
-#define ORTP_EVENT_ZRTP_SAS_READY		7
-#define ORTP_EVENT_ICE_CHECK_LIST_PROCESSING_FINISHED	8
-#define ORTP_EVENT_ICE_SESSION_PROCESSING_FINISHED	9
-#define ORTP_EVENT_ICE_GATHERING_FINISHED		10
-#define ORTP_EVENT_ICE_LOSING_PAIRS_COMPLETED		11
-#define ORTP_EVENT_ICE_RESTART_NEEDED			12
-#define ORTP_EVENT_DTLS_ENCRYPTION_CHANGED		13
-#define ORTP_EVENT_TMMBR_RECEIVED		14
 
 ORTP_PUBLIC OrtpEventData * ortp_event_get_data(OrtpEvent *ev);
 ORTP_PUBLIC void ortp_event_destroy(OrtpEvent *ev);
@@ -94,84 +97,9 @@ ORTP_PUBLIC void ortp_ev_queue_destroy(OrtpEvQueue *q);
 ORTP_PUBLIC OrtpEvent * ortp_ev_queue_get(OrtpEvQueue *q);
 ORTP_PUBLIC void ortp_ev_queue_flush(OrtpEvQueue * qp);
 
-struct _RtpSession;
-
-/**
- * Callback function when a RTCP packet of the interested type is found.
- *
- * @param evd the packet. Read-only, must NOT be changed.
- * @param user_data user data provided when registered the callback
- *
- */
-typedef void (*OrtpEvDispatcherCb)(const OrtpEventData *evd, void *user_data);
-typedef struct OrtpEvDispatcherData{
-	OrtpEventType type;
-	rtcp_type_t subtype;
-	OrtpEvDispatcherCb on_found;
-	void* user_data;
-} OrtpEvDispatcherData;
-
-typedef struct OrtpEvDispatcher{
-	OrtpEvQueue *q;
-	struct _RtpSession* session;
-	OList *cbs;
-} OrtpEvDispatcher;
-
-/**
- * Constructs an OrtpEvDispatcher object. This object can be used to be notified
- * when any RTCP type packet is received or emitted on the rtp session,
- * given a callback registered with \a ortp_ev_dispatcher_connect
- *
- * @param session RTP session to listen on. Cannot be NULL.
- *
- * @return OrtpEvDispatcher object newly created.
- */
-ORTP_PUBLIC OrtpEvDispatcher * ortp_ev_dispatcher_new(struct _RtpSession* session);
-/**
- * Frees the memory for the given dispatcher. Note that user_data must be freed
- * by caller, and so does the OrtpEvQueue.
- *
- * @param d OrtpEvDispatcher object
- */
-ORTP_PUBLIC void ortp_ev_dispatcher_destroy(OrtpEvDispatcher *d);
-/**
- * Iterate method to be called periodically. If a RTCP packet is found and
- * its type matches one of the callback connected with \a ortp_ev_dispatcher_connect,
- * this callback will be invoked in the current thread.
- *
- * @param d OrtpEvDispatcher object
- */
-ORTP_PUBLIC void ortp_ev_dispatcher_iterate(OrtpEvDispatcher *d);
-/**
- * Connects a callback to the given type of event packet and, in case of RTCP event,
- * for the given RTCP subtype.
- * When any event is found, the callback is invoked. Multiple
- * callbacks can be connected to the same type of event, and the same callback
- * can be connected to multiple type of event.
- *
- * @param d OrtpEvDispatcher object
- * @param type type of event to be notified of.
- * @param subtype when type is set to ORTP_EVENT_RTCP_PACKET_RECEIVED or ORTP_EVENT_RTCP_PACKET_EMITTED, subtype of RTCP packet to be notified of. Otherwise this parameter is not used.
- * @param on_receive function to call when a RTCP packet of the given type is found.
- * @param user_data user data given as last argument of the callback. Can be NULL. MUST be freed by user.
- */
-ORTP_PUBLIC void ortp_ev_dispatcher_connect(OrtpEvDispatcher *d
-											, OrtpEventType type
-											, rtcp_type_t subtype
-											, OrtpEvDispatcherCb on_receive
-											, void *user_data);
-
-/**
- * Disconnects the given callback for the given type and subtype on the given dispatcher.
-*/
-void ortp_ev_dispatcher_disconnect(OrtpEvDispatcher *d
-								, OrtpEventType type
-								, rtcp_type_t subtype
-								, OrtpEvDispatcherCb cb);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
-
