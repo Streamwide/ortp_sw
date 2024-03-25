@@ -31,9 +31,6 @@
 #include <process.h>
 #endif
 
-#ifdef HAVE_SYS_SHM_H
-#include <sys/shm.h>
-#endif
 
 static void *ortp_libc_malloc(size_t sz){
 	return malloc(sz);
@@ -489,30 +486,6 @@ int ortp_client_pipe_close(ortp_socket_t sock){
 	return close(sock);
 }
 
-#ifdef HAVE_SYS_SHM_H
-
-void *ortp_shm_open(unsigned int keyid, int size, int create){
-	key_t key=keyid;
-	void *mem;
-	int perms=S_IRUSR|S_IWUSR;
-	int fd=shmget(key,size,create ? (IPC_CREAT | perms ) : perms);
-	if (fd==-1){
-		printf("shmget failed: %s\n",strerror(errno));
-		return NULL;
-	}
-	mem=shmat(fd,NULL,0);
-	if (mem==(void*)-1){
-		printf("shmat() failed: %s", strerror(errno));
-		return NULL;
-	}
-	return mem;
-}
-
-void ortp_shm_close(void *mem){
-	shmdt(mem);
-}
-
-#endif
 
 #elif defined(_WIN32) && !defined(_WIN32_WCE)
 
