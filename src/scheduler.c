@@ -47,7 +47,7 @@ void rtp_scheduler_init(RtpScheduler *sched)
 	sched->e_max=0;
 }
 
-RtpScheduler * rtp_scheduler_new()
+RtpScheduler * rtp_scheduler_new(void)
 {
 	RtpScheduler *sched=(RtpScheduler *) ortp_malloc(sizeof(RtpScheduler));
 	memset(sched,0,sizeof(RtpScheduler));
@@ -113,7 +113,7 @@ void * rtp_scheduler_schedule(void * psched)
 	{
 		/* do the processing here: */
 		ortp_mutex_lock(&sched->lock);
-		
+
 		current=sched->list;
 		/* processing all scheduled rtp sessions */
 		while (current!=NULL)
@@ -125,7 +125,7 @@ void * rtp_scheduler_schedule(void * psched)
 		/* wake up all the threads that are sleeping in _select()  */
 		ortp_cond_broadcast(&sched->unblock_select_cond);
 		ortp_mutex_unlock(&sched->lock);
-		
+
 		/* now while the scheduler is going to sleep, the other threads can compute their
 		result mask and see if they have to leave, or to wait for next tick*/
 		//ortp_message("scheduler: sleeping.");
@@ -159,9 +159,9 @@ void rtp_scheduler_add_session(RtpScheduler *sched, RtpSession *session)
 			session->mask_pos=i;
 			session_set_set(&sched->all_sessions,session);
 			/* make a new session scheduled not blockable if it has not started*/
-			if (session->flags & RTP_SESSION_RECV_NOT_STARTED) 
+			if (session->flags & RTP_SESSION_RECV_NOT_STARTED)
 				session_set_set(&sched->r_sessions,session);
-			if (session->flags & RTP_SESSION_SEND_NOT_STARTED) 
+			if (session->flags & RTP_SESSION_SEND_NOT_STARTED)
 				session_set_set(&sched->w_sessions,session);
 			if (i>sched->all_max){
 				sched->all_max=i;
@@ -169,7 +169,7 @@ void rtp_scheduler_add_session(RtpScheduler *sched, RtpSession *session)
 			break;
 		}
 	}
-	
+
 	rtp_session_set_flag(session,RTP_SESSION_IN_SCHEDULER);
 	rtp_scheduler_unlock(sched);
 }
@@ -178,7 +178,7 @@ void rtp_scheduler_remove_session(RtpScheduler *sched, RtpSession *session)
 {
 	RtpSession *tmp;
 	int cond=1;
-	return_if_fail(session!=NULL); 
+	return_if_fail(session!=NULL);
 	if (!(session->flags & RTP_SESSION_IN_SCHEDULER)){
 		/* the rtp session is not scheduled, so return silently */
 		return;

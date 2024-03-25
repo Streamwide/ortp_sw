@@ -37,7 +37,7 @@ char *payload_type_get_rtpmap(PayloadType *pt)
 	return rtpmap;
 }
 
-PayloadType *payload_type_new()
+PayloadType *payload_type_new(void)
 {
 	PayloadType *newpayload=(PayloadType *)ortp_new0(PayloadType,1);
 	newpayload->flags|=PAYLOAD_TYPE_ALLOCATED;
@@ -170,7 +170,7 @@ static const char *find_last_param_occurence_of(const char *fmtp, const char *pa
 }
 /**
  * Parses a fmtp string such as "profile=0;level=10", finds the value matching
- * parameter param_name, and writes it into result. 
+ * parameter param_name, and writes it into result.
  * If a parameter name is found multiple times, only the value of the last occurence is returned.
  * Despite fmtp strings are not used anywhere within oRTP, this function can
  * be useful for people using RTP streams described from SDP.
@@ -179,7 +179,7 @@ static const char *find_last_param_occurence_of(const char *fmtp, const char *pa
  * @param result the value given for the parameter (if found)
  * @param result_len the size allocated to hold the result string
  * @return TRUE if the parameter was found, else FALSE.
-**/ 
+**/
 bool_t fmtp_get_value(const char *fmtp, const char *param_name, char *result, size_t result_len){
 	const char *pos=find_last_param_occurence_of(fmtp,param_name);
 	memset(result, '\0', result_len);
