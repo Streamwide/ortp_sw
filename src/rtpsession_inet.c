@@ -556,7 +556,7 @@ int rtp_session_set_multicast_ttl(RtpSession *session, int ttl)
  * Returns the TTL (Time-To-Live) for outgoing multicast packets.
  *
 **/
-int rtp_session_get_multicast_ttl(RtpSession *session)
+int rtp_session_get_multicast_ttl(const RtpSession *session)
 {
 	return session->multicast_ttl;
 }
@@ -630,7 +630,7 @@ int rtp_session_set_multicast_loopback(RtpSession *session, int yesno)
  * Returns the multicast loopback state of rtp session (true or false).
  *
 **/
-int rtp_session_get_multicast_loopback(RtpSession *session)
+int rtp_session_get_multicast_loopback(const RtpSession *session)
 {
 	return session->multicast_loopback;
 }

@@ -490,10 +490,10 @@ ORTP_PUBLIC int rtp_session_set_pktinfo(RtpSession *session, int activate);
 
 /* Multicast methods */
 ORTP_PUBLIC int rtp_session_set_multicast_ttl(RtpSession *session, int ttl);
-ORTP_PUBLIC int rtp_session_get_multicast_ttl(RtpSession *session);
+ORTP_PUBLIC int rtp_session_get_multicast_ttl(const RtpSession *session);
 
 ORTP_PUBLIC int rtp_session_set_multicast_loopback(RtpSession *session, int yesno);
-ORTP_PUBLIC int rtp_session_get_multicast_loopback(RtpSession *session);
+ORTP_PUBLIC int rtp_session_get_multicast_loopback(const RtpSession *session);
 
 
 
