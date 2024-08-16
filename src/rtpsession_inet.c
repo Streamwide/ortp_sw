@@ -515,24 +515,27 @@ int rtp_session_set_multicast_ttl(RtpSession *session, int ttl)
 	switch (session->rtp.gs.sockfamily) {
 		case AF_INET: {
 
-			retval= setsockopt(session->rtp.gs.socket, IPPROTO_IP, IP_MULTICAST_TTL,
+			retval = setsockopt(session->rtp.gs.socket, IPPROTO_IP, IP_MULTICAST_TTL,
 						 (SOCKET_OPTION_VALUE)  &session->multicast_ttl, sizeof(session->multicast_ttl));
 
 			if (retval<0) break;
 
-			retval= setsockopt(session->rtcp.gs.socket, IPPROTO_IP, IP_MULTICAST_TTL,
-					 (SOCKET_OPTION_VALUE)	   &session->multicast_ttl, sizeof(session->multicast_ttl));
-
+			if (session->rtcp.gs.socket != (ortp_socket_t)-1) {
+				retval= setsockopt(session->rtcp.gs.socket, IPPROTO_IP, IP_MULTICAST_TTL,
+						(SOCKET_OPTION_VALUE)	   &session->multicast_ttl, sizeof(session->multicast_ttl));
+			}
 		} break;
 		case AF_INET6: {
 
-			retval= setsockopt(session->rtp.gs.socket, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
+			retval = setsockopt(session->rtp.gs.socket, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
 					 (SOCKET_OPTION_VALUE)&session->multicast_ttl, sizeof(session->multicast_ttl));
 
 			if (retval<0) break;
 
-			retval= setsockopt(session->rtcp.gs.socket, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
-					 (SOCKET_OPTION_VALUE) &session->multicast_ttl, sizeof(session->multicast_ttl));
+			if (session->rtcp.gs.socket != (ortp_socket_t)-1) {
+				retval = setsockopt(session->rtcp.gs.socket, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
+						(SOCKET_OPTION_VALUE) &session->multicast_ttl, sizeof(session->multicast_ttl));
+			}
 		} break;
 	default:
 		retval=-1;
@@ -587,27 +590,30 @@ int rtp_session_set_multicast_loopback(RtpSession *session, int yesno)
 	switch (session->rtp.gs.sockfamily) {
 		case AF_INET: {
 
-			retval= setsockopt(session->rtp.gs.socket, IPPROTO_IP, IP_MULTICAST_LOOP,
+			retval = setsockopt(session->rtp.gs.socket, IPPROTO_IP, IP_MULTICAST_LOOP,
 						 (SOCKET_OPTION_VALUE)   &session->multicast_loopback, sizeof(session->multicast_loopback));
 
 			if (retval<0) break;
 
-			retval= setsockopt(session->rtcp.gs.socket, IPPROTO_IP, IP_MULTICAST_LOOP,
-						 (SOCKET_OPTION_VALUE)   &session->multicast_loopback, sizeof(session->multicast_loopback));
-
+			if (session->rtcp.gs.socket != (ortp_socket_t)-1) {
+				retval = setsockopt(session->rtcp.gs.socket, IPPROTO_IP, IP_MULTICAST_LOOP,
+							(SOCKET_OPTION_VALUE)   &session->multicast_loopback, sizeof(session->multicast_loopback));
+			}
 		} break;
 		case AF_INET6: {
 
-			retval= setsockopt(session->rtp.gs.socket, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
+			retval = setsockopt(session->rtp.gs.socket, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
 				 (SOCKET_OPTION_VALUE)	&session->multicast_loopback, sizeof(session->multicast_loopback));
 
 			if (retval<0) break;
 
-			retval= setsockopt(session->rtcp.gs.socket, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
-				 (SOCKET_OPTION_VALUE)	&session->multicast_loopback, sizeof(session->multicast_loopback));
+			if (session->rtcp.gs.socket != (ortp_socket_t)-1) {
+				retval = setsockopt(session->rtcp.gs.socket, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
+					(SOCKET_OPTION_VALUE)	&session->multicast_loopback, sizeof(session->multicast_loopback));
+			}
 		} break;
 	default:
-		retval=-1;
+		retval =-1;
 	}
 
 	if (retval<0)
