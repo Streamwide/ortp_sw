@@ -335,10 +335,10 @@ static void set_socket_sizes(ortp_socket_t sock, unsigned int sndbufsz, unsigned
 
 /**
  *rtp_session_set_local_addr:
- *@param session:		a rtp session freshly created.
- *@param addr:		a local IP address in the xxx.xxx.xxx.xxx form.
- *@param rtp_port:		a local port or -1 to let oRTP choose the port randomly
- *@param rtcp_port:		a local port or -1 to let oRTP choose the port randomly
+ *@param session:       a rtp session freshly created.
+ *@param addr:          a local IP address in the xxx.xxx.xxx.xxx form.
+ *@param rtp_port:      a local port or -1 to let oRTP choose the port randomly
+ *@param rtcp_port:     a local port or -1 to let oRTP choose the port randomly, -2 for no RTCP port
  *
  *	Specify the local addr to be use to listen for rtp packets or to send rtp packet from.
  *	In case where the rtp session is send-only, then it is not required to call this function:
@@ -367,7 +367,7 @@ rtp_session_set_local_addr (RtpSession * session, const char * addr, int rtp_por
 		session->rtp.gs.socket=sock;
 		session->rtp.gs.loc_port=rtp_port;
 
-		if (!session->rtcp_mux) {
+		if (rtcp_port != -2) {
 			/*try to bind rtcp port */
 			sock=create_and_bind(addr,&rtcp_port,&sockfamily,session->reuseaddr,&session->rtcp.gs.loc_addr,&session->rtcp.gs.loc_addrlen);
 			if (sock!=(ortp_socket_t)-1){
@@ -378,6 +378,8 @@ rtp_session_set_local_addr (RtpSession * session, const char * addr, int rtp_por
 				ortp_error("Could not create and bind rtcp socket for session [%p]",session);
 				return -1;
 			}
+		} else {
+			session->rtcp.gs.loc_port=rtcp_port;
 		}
 
 		/* set socket options (but don't change chosen states) */
@@ -515,27 +517,24 @@ int rtp_session_set_multicast_ttl(RtpSession *session, int ttl)
 	switch (session->rtp.gs.sockfamily) {
 		case AF_INET: {
 
-			retval = setsockopt(session->rtp.gs.socket, IPPROTO_IP, IP_MULTICAST_TTL,
+			retval= setsockopt(session->rtp.gs.socket, IPPROTO_IP, IP_MULTICAST_TTL,
 						 (SOCKET_OPTION_VALUE)  &session->multicast_ttl, sizeof(session->multicast_ttl));
 
 			if (retval<0) break;
 
-			if (session->rtcp.gs.socket != (ortp_socket_t)-1) {
-				retval= setsockopt(session->rtcp.gs.socket, IPPROTO_IP, IP_MULTICAST_TTL,
-						(SOCKET_OPTION_VALUE)	   &session->multicast_ttl, sizeof(session->multicast_ttl));
-			}
+			retval= setsockopt(session->rtcp.gs.socket, IPPROTO_IP, IP_MULTICAST_TTL,
+					 (SOCKET_OPTION_VALUE)	   &session->multicast_ttl, sizeof(session->multicast_ttl));
+
 		} break;
 		case AF_INET6: {
 
-			retval = setsockopt(session->rtp.gs.socket, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
+			retval= setsockopt(session->rtp.gs.socket, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
 					 (SOCKET_OPTION_VALUE)&session->multicast_ttl, sizeof(session->multicast_ttl));
 
 			if (retval<0) break;
 
-			if (session->rtcp.gs.socket != (ortp_socket_t)-1) {
-				retval = setsockopt(session->rtcp.gs.socket, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
-						(SOCKET_OPTION_VALUE) &session->multicast_ttl, sizeof(session->multicast_ttl));
-			}
+			retval= setsockopt(session->rtcp.gs.socket, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
+					 (SOCKET_OPTION_VALUE) &session->multicast_ttl, sizeof(session->multicast_ttl));
 		} break;
 	default:
 		retval=-1;
@@ -556,7 +555,7 @@ int rtp_session_set_multicast_ttl(RtpSession *session, int ttl)
  * Returns the TTL (Time-To-Live) for outgoing multicast packets.
  *
 **/
-int rtp_session_get_multicast_ttl(const RtpSession *session)
+int rtp_session_get_multicast_ttl(RtpSession *session)
 {
 	return session->multicast_ttl;
 }
@@ -590,30 +589,27 @@ int rtp_session_set_multicast_loopback(RtpSession *session, int yesno)
 	switch (session->rtp.gs.sockfamily) {
 		case AF_INET: {
 
-			retval = setsockopt(session->rtp.gs.socket, IPPROTO_IP, IP_MULTICAST_LOOP,
+			retval= setsockopt(session->rtp.gs.socket, IPPROTO_IP, IP_MULTICAST_LOOP,
 						 (SOCKET_OPTION_VALUE)   &session->multicast_loopback, sizeof(session->multicast_loopback));
 
 			if (retval<0) break;
 
-			if (session->rtcp.gs.socket != (ortp_socket_t)-1) {
-				retval = setsockopt(session->rtcp.gs.socket, IPPROTO_IP, IP_MULTICAST_LOOP,
-							(SOCKET_OPTION_VALUE)   &session->multicast_loopback, sizeof(session->multicast_loopback));
-			}
+			retval= setsockopt(session->rtcp.gs.socket, IPPROTO_IP, IP_MULTICAST_LOOP,
+						 (SOCKET_OPTION_VALUE)   &session->multicast_loopback, sizeof(session->multicast_loopback));
+
 		} break;
 		case AF_INET6: {
 
-			retval = setsockopt(session->rtp.gs.socket, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
+			retval= setsockopt(session->rtp.gs.socket, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
 				 (SOCKET_OPTION_VALUE)	&session->multicast_loopback, sizeof(session->multicast_loopback));
 
 			if (retval<0) break;
 
-			if (session->rtcp.gs.socket != (ortp_socket_t)-1) {
-				retval = setsockopt(session->rtcp.gs.socket, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
-					(SOCKET_OPTION_VALUE)	&session->multicast_loopback, sizeof(session->multicast_loopback));
-			}
+			retval= setsockopt(session->rtcp.gs.socket, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
+				 (SOCKET_OPTION_VALUE)	&session->multicast_loopback, sizeof(session->multicast_loopback));
 		} break;
 	default:
-		retval =-1;
+		retval=-1;
 	}
 
 	if (retval<0)
@@ -630,7 +626,7 @@ int rtp_session_set_multicast_loopback(RtpSession *session, int yesno)
  * Returns the multicast loopback state of rtp session (true or false).
  *
 **/
-int rtp_session_get_multicast_loopback(const RtpSession *session)
+int rtp_session_get_multicast_loopback(RtpSession *session)
 {
 	return session->multicast_loopback;
 }
@@ -842,7 +838,7 @@ _rtp_session_set_remote_addr_full (RtpSession * session, const char * rtp_addr, 
 	}
 
 	memset(&hints, 0, sizeof(hints));
-	hints.ai_family = (session->rtp.gs.socket == -1) ? AF_UNSPEC : session->rtp.gs.sockfamily;
+	// hints.ai_family = (session->rtp.gs.socket == -1) ? AF_UNSPEC : session->rtp.gs.sockfamily;
 	hints.ai_socktype = SOCK_DGRAM;
 #ifndef ANDROID
 	hints.ai_flags |= hints.ai_family==AF_INET6 ? AI_V4MAPPED | AI_ALL : 0;
@@ -884,14 +880,29 @@ _rtp_session_set_remote_addr_full (RtpSession * session, const char * rtp_addr, 
 			break;
 		}
 	}
+	if (err && res0 && session->rtp.gs.sockfamily == AF_INET6) {
+		struct sockaddr_in6* saddr6 = (struct sockaddr_in6*)&session->rtp.gs.loc_addr;
+		static const struct in6_addr any_addr6 = IN6ADDR_ANY_INIT;
+		// if local addr is bound to ANY IPv6, then just use the first address of destination
+		if (!memcmp(&saddr6->sin6_addr, &any_addr6, sizeof(any_addr6))) {
+			memcpy(rtp_saddr, res0->ai_addr, res0->ai_addrlen);
+			*rtp_saddr_len=(socklen_t)res0->ai_addrlen;
+			err=0;
+		}
+	}
 	freeaddrinfo(res0);
 	if (err) {
 		ortp_warning("Could not set destination for RTP socket to %s:%i.",rtp_addr,rtp_port);
 		goto end;
 	}
 
+	OrtpStream* gs = &session->rtp.gs;
+	if (session->rtcp.gs.socket != -1) {
+		gs = &session->rtcp.gs;
+	}
+
 	memset(&hints, 0, sizeof(hints));
-	hints.ai_family = (session->rtp.gs.socket == -1) ? AF_UNSPEC : session->rtp.gs.sockfamily;
+	// hints.ai_family = (session->rtcp.gs.socket == -1) ? AF_UNSPEC : session->rtcp.gs.sockfamily;
 	hints.ai_socktype = SOCK_DGRAM;
 #ifndef ANDROID
 	hints.ai_flags |= hints.ai_family==AF_INET6 ? AI_V4MAPPED | AI_ALL : 0;
@@ -906,11 +917,21 @@ _rtp_session_set_remote_addr_full (RtpSession * session, const char * rtp_addr, 
 	err=-1;
 	for (res = res0; res; res = res->ai_next) {
 		/* set a destination address that has the same type as the local address */
-		if (res->ai_family==session->rtp.gs.sockfamily ) {
+		if (res->ai_family==gs->sockfamily ) {
 			err=0;
 			memcpy(rtcp_saddr, res->ai_addr, res->ai_addrlen);
 			*rtcp_saddr_len=(socklen_t)res->ai_addrlen;
 			break;
+		}
+	}
+	if (err && res0 && gs->sockfamily == AF_INET6) {
+		struct sockaddr_in6* saddr6 = (struct sockaddr_in6*)&gs->loc_addr;
+		static const struct in6_addr any_addr6 = IN6ADDR_ANY_INIT;
+		// if local addr is bound to ANY IPv6, then just use the first address of destination
+		if (!memcmp(&saddr6->sin6_addr, &any_addr6, sizeof(any_addr6))) {
+			memcpy(rtcp_saddr, res0->ai_addr, res0->ai_addrlen);
+			*rtcp_saddr_len=(socklen_t)res0->ai_addrlen;
+			err=0;
 		}
 	}
 	freeaddrinfo(res0);
