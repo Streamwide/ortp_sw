@@ -827,6 +827,7 @@ _rtp_session_set_remote_addr_full (RtpSession * session, const char * rtp_addr, 
 	struct sockaddr_storage *rtcp_saddr=&session->rtcp.gs.rem_addr;
 	socklen_t *rtcp_saddr_len=&session->rtcp.gs.rem_addrlen;
 	OrtpAddress *aux_rtp=NULL,*aux_rtcp=NULL;
+        OrtpStream* gs = NULL;
 
 	if (is_aux){
 		aux_rtp=ortp_malloc0(sizeof(OrtpAddress));
@@ -896,7 +897,7 @@ _rtp_session_set_remote_addr_full (RtpSession * session, const char * rtp_addr, 
 		goto end;
 	}
 
-	OrtpStream* gs = &session->rtp.gs;
+	gs = &session->rtp.gs;
 	if (session->rtcp.gs.socket != -1) {
 		gs = &session->rtcp.gs;
 	}

@@ -20,9 +20,16 @@
 #
 ############################################################################
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.16)
 project(ORTP)
 
+set(CMAKE_C_STANDARD 17)
+set(CMAKE_C_STANDARD_REQUIRED TRUE)
+set(CMAKE_C_EXTENSIONS ON)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+set(CMAKE_CXX_EXTENSIONS ON)
 
 set(ORTP_MAJOR_VERSION "0")
 set(ORTP_MINOR_VERSION "26")
