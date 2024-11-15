@@ -827,7 +827,6 @@ _rtp_session_set_remote_addr_full (RtpSession * session, const char * rtp_addr, 
 	struct sockaddr_storage *rtcp_saddr=&session->rtcp.gs.rem_addr;
 	socklen_t *rtcp_saddr_len=&session->rtcp.gs.rem_addrlen;
 	OrtpAddress *aux_rtp=NULL,*aux_rtcp=NULL;
-        OrtpStream* gs = NULL;
 
 	if (is_aux){
 		aux_rtp=ortp_malloc0(sizeof(OrtpAddress));
@@ -839,7 +838,7 @@ _rtp_session_set_remote_addr_full (RtpSession * session, const char * rtp_addr, 
 	}
 
 	memset(&hints, 0, sizeof(hints));
-	// hints.ai_family = (session->rtp.gs.socket == -1) ? AF_UNSPEC : session->rtp.gs.sockfamily;
+	hints.ai_family = (session->rtp.gs.socket == -1) ? AF_UNSPEC : session->rtp.gs.sockfamily;
 	hints.ai_socktype = SOCK_DGRAM;
 #ifndef ANDROID
 	hints.ai_flags |= hints.ai_family==AF_INET6 ? AI_V4MAPPED | AI_ALL : 0;
@@ -881,29 +880,14 @@ _rtp_session_set_remote_addr_full (RtpSession * session, const char * rtp_addr, 
 			break;
 		}
 	}
-	if (err && res0 && session->rtp.gs.sockfamily == AF_INET6) {
-		struct sockaddr_in6* saddr6 = (struct sockaddr_in6*)&session->rtp.gs.loc_addr;
-		static const struct in6_addr any_addr6 = IN6ADDR_ANY_INIT;
-		// if local addr is bound to ANY IPv6, then just use the first address of destination
-		if (!memcmp(&saddr6->sin6_addr, &any_addr6, sizeof(any_addr6))) {
-			memcpy(rtp_saddr, res0->ai_addr, res0->ai_addrlen);
-			*rtp_saddr_len=(socklen_t)res0->ai_addrlen;
-			err=0;
-		}
-	}
 	freeaddrinfo(res0);
 	if (err) {
 		ortp_warning("Could not set destination for RTP socket to %s:%i.",rtp_addr,rtp_port);
 		goto end;
 	}
 
-	gs = &session->rtp.gs;
-	if (session->rtcp.gs.socket != -1) {
-		gs = &session->rtcp.gs;
-	}
-
 	memset(&hints, 0, sizeof(hints));
-	// hints.ai_family = (session->rtcp.gs.socket == -1) ? AF_UNSPEC : session->rtcp.gs.sockfamily;
+	hints.ai_family = (session->rtp.gs.socket == -1) ? AF_UNSPEC : session->rtp.gs.sockfamily;
 	hints.ai_socktype = SOCK_DGRAM;
 #ifndef ANDROID
 	hints.ai_flags |= hints.ai_family==AF_INET6 ? AI_V4MAPPED | AI_ALL : 0;
@@ -918,21 +902,11 @@ _rtp_session_set_remote_addr_full (RtpSession * session, const char * rtp_addr, 
 	err=-1;
 	for (res = res0; res; res = res->ai_next) {
 		/* set a destination address that has the same type as the local address */
-		if (res->ai_family==gs->sockfamily ) {
+		if (res->ai_family==session->rtp.gs.sockfamily ) {
 			err=0;
 			memcpy(rtcp_saddr, res->ai_addr, res->ai_addrlen);
 			*rtcp_saddr_len=(socklen_t)res->ai_addrlen;
 			break;
-		}
-	}
-	if (err && res0 && gs->sockfamily == AF_INET6) {
-		struct sockaddr_in6* saddr6 = (struct sockaddr_in6*)&gs->loc_addr;
-		static const struct in6_addr any_addr6 = IN6ADDR_ANY_INIT;
-		// if local addr is bound to ANY IPv6, then just use the first address of destination
-		if (!memcmp(&saddr6->sin6_addr, &any_addr6, sizeof(any_addr6))) {
-			memcpy(rtcp_saddr, res0->ai_addr, res0->ai_addrlen);
-			*rtcp_saddr_len=(socklen_t)res0->ai_addrlen;
-			err=0;
 		}
 	}
 	freeaddrinfo(res0);
