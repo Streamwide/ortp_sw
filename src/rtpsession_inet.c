@@ -516,28 +516,27 @@ int rtp_session_set_multicast_ttl(RtpSession *session, int ttl)
 
 	switch (session->rtp.gs.sockfamily) {
 		case AF_INET: {
-
-			retval= setsockopt(session->rtp.gs.socket, IPPROTO_IP, IP_MULTICAST_TTL,
+			retval = setsockopt(session->rtp.gs.socket, IPPROTO_IP, IP_MULTICAST_TTL,
 						 (SOCKET_OPTION_VALUE)  &session->multicast_ttl, sizeof(session->multicast_ttl));
 
 			if (retval<0) break;
 
-			retval= setsockopt(session->rtcp.gs.socket, IPPROTO_IP, IP_MULTICAST_TTL,
+			retval = setsockopt(session->rtcp.gs.socket, IPPROTO_IP, IP_MULTICAST_TTL,
 					 (SOCKET_OPTION_VALUE)	   &session->multicast_ttl, sizeof(session->multicast_ttl));
 
 		} break;
 		case AF_INET6: {
 
-			retval= setsockopt(session->rtp.gs.socket, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
+			retval = setsockopt(session->rtp.gs.socket, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
 					 (SOCKET_OPTION_VALUE)&session->multicast_ttl, sizeof(session->multicast_ttl));
 
 			if (retval<0) break;
 
-			retval= setsockopt(session->rtcp.gs.socket, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
+			retval = setsockopt(session->rtcp.gs.socket, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
 					 (SOCKET_OPTION_VALUE) &session->multicast_ttl, sizeof(session->multicast_ttl));
 		} break;
 	default:
-		retval=-1;
+		retval = -1;
 	}
 
 	if (retval<0)
@@ -589,27 +588,27 @@ int rtp_session_set_multicast_loopback(RtpSession *session, int yesno)
 	switch (session->rtp.gs.sockfamily) {
 		case AF_INET: {
 
-			retval= setsockopt(session->rtp.gs.socket, IPPROTO_IP, IP_MULTICAST_LOOP,
+			retval = setsockopt(session->rtp.gs.socket, IPPROTO_IP, IP_MULTICAST_LOOP,
 						 (SOCKET_OPTION_VALUE)   &session->multicast_loopback, sizeof(session->multicast_loopback));
 
 			if (retval<0) break;
 
-			retval= setsockopt(session->rtcp.gs.socket, IPPROTO_IP, IP_MULTICAST_LOOP,
+			retval = setsockopt(session->rtcp.gs.socket, IPPROTO_IP, IP_MULTICAST_LOOP,
 						 (SOCKET_OPTION_VALUE)   &session->multicast_loopback, sizeof(session->multicast_loopback));
 
 		} break;
 		case AF_INET6: {
 
-			retval= setsockopt(session->rtp.gs.socket, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
+			retval = setsockopt(session->rtp.gs.socket, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
 				 (SOCKET_OPTION_VALUE)	&session->multicast_loopback, sizeof(session->multicast_loopback));
 
 			if (retval<0) break;
 
-			retval= setsockopt(session->rtcp.gs.socket, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
+			retval = setsockopt(session->rtcp.gs.socket, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
 				 (SOCKET_OPTION_VALUE)	&session->multicast_loopback, sizeof(session->multicast_loopback));
 		} break;
 	default:
-		retval=-1;
+		retval =-1;
 	}
 
 	if (retval<0)
@@ -642,7 +641,7 @@ int rtp_session_get_multicast_loopback(const RtpSession *session)
  *
 **/
 int rtp_session_set_dscp(RtpSession *session, int dscp){
-	int retval=0;
+	int retval =0;
 	int tos;
 	int proto;
 	int value_type;
@@ -693,7 +692,7 @@ int rtp_session_set_dscp(RtpSession *session, int dscp){
 				if (QoSResult != TRUE){
 					ortp_error("QOSCreateHandle failed to create handle with error %d\n",
 						GetLastError());
-					retval=-1;
+					retval =-1;
 				}
 			}
 			if (session->rtp.QoSHandle!=NULL) {
@@ -709,7 +708,7 @@ int rtp_session_set_dscp(RtpSession *session, int dscp){
 				if (QoSResult != TRUE){
 					ortp_error("QOSAddSocketToFlow failed to add a flow with error %d\n",
 						GetLastError());
-					retval=-1;
+					retval =-1;
 				}
 			}
 		}
@@ -735,7 +734,7 @@ int rtp_session_set_dscp(RtpSession *session, int dscp){
 			return -1;
 		}
 		retval = setsockopt(session->rtp.gs.socket, proto, value_type, (SOCKET_OPTION_VALUE)&tos, sizeof(tos));
-		if (retval==-1)
+		if (retval ==-1)
 			ortp_error("Fail to set DSCP value on rtp socket: %s",getSocketError());
 		if (session->rtcp.gs.socket != (ortp_socket_t)-1){
 			if (setsockopt(session->rtcp.gs.socket, proto, value_type, (SOCKET_OPTION_VALUE)&tos, sizeof(tos))==-1){
