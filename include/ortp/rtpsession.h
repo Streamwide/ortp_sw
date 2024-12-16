@@ -285,7 +285,7 @@ typedef struct _OrtpStream {
 	unsigned int recv_bytes; /* used for bandwidth estimation */
 	float upload_bw;
 	float download_bw;
-	OList *aux_destinations; /*list of OrtpAddress */
+	// OList *aux_destinations; /*list of OrtpAddress */
 	msgb_allocator_t allocator;
 } OrtpStream;
 
@@ -467,8 +467,8 @@ rtp_session_set_remote_addr_full (RtpSession * session, const char * rtp_addr, i
 /*same as previous function, old name:*/
 ORTP_PUBLIC int rtp_session_set_remote_addr_and_port (RtpSession * session, const char * addr, int rtp_port, int rtcp_port);
 ORTP_PUBLIC int rtp_session_set_remote_addr(RtpSession *session,const char *addr, int port);
-ORTP_PUBLIC int rtp_session_add_aux_remote_addr_full(RtpSession * session, const char * rtp_addr, int rtp_port, const char * rtcp_addr, int rtcp_port);
-ORTP_PUBLIC void rtp_session_clear_aux_remote_addr(RtpSession * session);
+// ORTP_PUBLIC int rtp_session_add_aux_remote_addr_full(RtpSession * session, const char * rtp_addr, int rtp_port, const char * rtcp_addr, int rtcp_port);
+// ORTP_PUBLIC void rtp_session_clear_aux_remote_addr(RtpSession * session);
 /* alternatively to the set_remote_addr() and set_local_addr(), an application can give
 a valid socket (potentially connect()ed )to be used by the RtpSession */
 ORTP_PUBLIC void rtp_session_set_sockets(RtpSession *session, int rtpfd, int rtcpfd);

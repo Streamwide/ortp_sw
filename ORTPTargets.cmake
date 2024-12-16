@@ -56,7 +56,7 @@ set_target_properties(ortp PROPERTIES
 # Import target "ortp" for configuration ""
 set_property(TARGET ortp APPEND PROPERTY IMPORTED_CONFIGURATIONS NOCONFIG)
 set_target_properties(ortp PROPERTIES
-  IMPORTED_LOCATION_NOCONFIG "/home/kerlu/workspace/github/ortp_sw/src/libortp.so.11"
+  IMPORTED_LOCATION_NOCONFIG "/home/kerlu/workspace/ortp_sw/src/libortp.so.11"
   IMPORTED_SONAME_NOCONFIG "libortp.so.11"
   )
 

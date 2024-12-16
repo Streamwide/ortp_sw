@@ -825,16 +825,16 @@ _rtp_session_set_remote_addr_full (RtpSession * session, const char * rtp_addr, 
 	socklen_t *rtp_saddr_len=&session->rtp.gs.rem_addrlen;
 	struct sockaddr_storage *rtcp_saddr=&session->rtcp.gs.rem_addr;
 	socklen_t *rtcp_saddr_len=&session->rtcp.gs.rem_addrlen;
-	OrtpAddress *aux_rtp=NULL,*aux_rtcp=NULL;
+	// OrtpAddress *aux_rtp=NULL,*aux_rtcp=NULL;
 
-	if (is_aux){
-		aux_rtp=ortp_malloc0(sizeof(OrtpAddress));
-		rtp_saddr=&aux_rtp->addr;
-		rtp_saddr_len=&aux_rtp->len;
-		aux_rtcp=ortp_malloc0(sizeof(OrtpAddress));
-		rtcp_saddr=&aux_rtcp->addr;
-		rtcp_saddr_len=&aux_rtcp->len;
-	}
+	// if (is_aux){
+	// 	aux_rtp=ortp_malloc0(sizeof(OrtpAddress));
+	// 	rtp_saddr=&aux_rtp->addr;
+	// 	rtp_saddr_len=&aux_rtp->len;
+	// 	aux_rtcp=ortp_malloc0(sizeof(OrtpAddress));
+	// 	rtcp_saddr=&aux_rtcp->addr;
+	// 	rtcp_saddr_len=&aux_rtcp->len;
+	// }
 
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = (session->rtp.gs.socket == -1) ? AF_UNSPEC : session->rtp.gs.sockfamily;
@@ -942,15 +942,15 @@ _rtp_session_set_remote_addr_full (RtpSession * session, const char * rtp_addr, 
 									,rtcp_port
 									,is_aux ? "as auxiliary destination" : "");
 	end:
-	if (is_aux){
-		if (err==-1){
-			ortp_free(aux_rtp);
-			ortp_free(aux_rtcp);
-		}else{
-			session->rtp.gs.aux_destinations=o_list_append(session->rtp.gs.aux_destinations,aux_rtp);
-			session->rtcp.gs.aux_destinations=o_list_append(session->rtcp.gs.aux_destinations,aux_rtcp);
-		}
-	}
+	// if (is_aux){
+	// 	if (err==-1){
+	// 		ortp_free(aux_rtp);
+	// 		ortp_free(aux_rtcp);
+	// 	}else{
+	// 		session->rtp.gs.aux_destinations=o_list_append(session->rtp.gs.aux_destinations,aux_rtp);
+	// 		session->rtcp.gs.aux_destinations=o_list_append(session->rtcp.gs.aux_destinations,aux_rtcp);
+	// 	}
+	// }
 	return err;
 }
 
@@ -972,15 +972,15 @@ int rtp_session_set_remote_addr_and_port(RtpSession * session, const char * addr
  *	Returns: 0 on success.
 **/
 
-int
-rtp_session_add_aux_remote_addr_full(RtpSession * session, const char * rtp_addr, int rtp_port, const char * rtcp_addr, int rtcp_port){
-	return _rtp_session_set_remote_addr_full(session,rtp_addr,rtp_port,rtcp_addr,rtcp_port,TRUE);
-}
+// int
+// rtp_session_add_aux_remote_addr_full(RtpSession * session, const char * rtp_addr, int rtp_port, const char * rtcp_addr, int rtcp_port){
+// 	return _rtp_session_set_remote_addr_full(session,rtp_addr,rtp_port,rtcp_addr,rtcp_port,TRUE);
+// }
 
-void rtp_session_clear_aux_remote_addr(RtpSession * session){
-	ortp_stream_clear_aux_addresses(&session->rtp.gs);
-	ortp_stream_clear_aux_addresses(&session->rtcp.gs);
-}
+// void rtp_session_clear_aux_remote_addr(RtpSession * session){
+// 	ortp_stream_clear_aux_addresses(&session->rtp.gs);
+// 	ortp_stream_clear_aux_addresses(&session->rtcp.gs);
+// }
 
 void rtp_session_set_sockets(RtpSession *session, int rtpfd, int rtcpfd){
 	if (rtpfd!=-1) set_non_blocking_socket(rtpfd);
@@ -1149,7 +1149,7 @@ int rtp_session_rtp_send (RtpSession * session, mblk_t * m){
 	rtp_header_t *hdr;
 	struct sockaddr *destaddr=(struct sockaddr*)&session->rtp.gs.rem_addr;
 	socklen_t destlen=session->rtp.gs.rem_addrlen;
-	OList *elem=NULL;
+	// OList *elem=NULL;
 
 	hdr = (rtp_header_t *) m->b_rptr;
 	if (hdr->version == 0) {
@@ -1170,10 +1170,10 @@ int rtp_session_rtp_send (RtpSession * session, mblk_t * m){
 	/*first send to main destination*/
 	if (destlen) error=rtp_session_rtp_sendto(session,m,destaddr,destlen,FALSE);
 	/*then iterate over auxiliary destinations*/
-	for(elem=session->rtp.gs.aux_destinations;elem!=NULL;elem=elem->next){
-		OrtpAddress *addr=(OrtpAddress*)elem->data;
-		rtp_session_rtp_sendto(session,m,(struct sockaddr*)&addr->addr,addr->len,TRUE);
-	}
+	// for(elem=session->rtp.gs.aux_destinations;elem!=NULL;elem=elem->next){
+	// 	OrtpAddress *addr=(OrtpAddress*)elem->data;
+	// 	rtp_session_rtp_sendto(session,m,(struct sockaddr*)&addr->addr,addr->len,TRUE);
+	// }
 	freemsg(m);
 	return error;
 }
@@ -1209,7 +1209,7 @@ rtp_session_rtcp_send (RtpSession * session, mblk_t * m){
 	ortp_socket_t sockfd=session->rtcp.gs.socket;
 	struct sockaddr *destaddr=session->rtcp_mux ? (struct sockaddr*)&session->rtp.gs.rem_addr : (struct sockaddr*)&session->rtcp.gs.rem_addr;
 	socklen_t destlen=session->rtcp_mux ? session->rtp.gs.rem_addrlen : session->rtcp.gs.rem_addrlen;
-	OList *elem=NULL;
+	// OList *elem=NULL;
 	bool_t using_connected_socket=(session->flags & RTCP_SOCKET_CONNECTED)!=0;
 
 	if (using_connected_socket) {
@@ -1222,10 +1222,10 @@ rtp_session_rtcp_send (RtpSession * session, mblk_t * m){
 			|| rtp_session_using_transport(session, rtcp) ) {
 			rtp_session_rtcp_sendto(session,m,destaddr,destlen,FALSE);
 		}
-		for(elem=session->rtcp.gs.aux_destinations;elem!=NULL;elem=elem->next){
-			OrtpAddress *addr=(OrtpAddress*)elem->data;
-			rtp_session_rtcp_sendto(session,m,(struct sockaddr*)&addr->addr,addr->len,TRUE);
-		}
+		// for(elem=session->rtcp.gs.aux_destinations;elem!=NULL;elem=elem->next){
+		// 	OrtpAddress *addr=(OrtpAddress*)elem->data;
+		// 	rtp_session_rtcp_sendto(session,m,(struct sockaddr*)&addr->addr,addr->len,TRUE);
+		// }
 	}else ortp_message("Not sending rtcp report, rtcp disabled.");
 	freemsg(m);
 	return error;

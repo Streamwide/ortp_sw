@@ -1484,18 +1484,18 @@ void rtp_session_dispatch_event(RtpSession *session, OrtpEvent *ev){
 	ortp_event_destroy(ev);
 }
 
-void ortp_stream_clear_aux_addresses(OrtpStream *os){
-	OList *elem;
-	for (elem=os->aux_destinations;elem!=NULL;elem=elem->next){
-		OrtpAddress *addr=(OrtpAddress*)elem->data;
-		ortp_free(addr);
-	}
-	os->aux_destinations=o_list_free(os->aux_destinations);
-}
+// void ortp_stream_clear_aux_addresses(OrtpStream *os){
+// 	OList *elem;
+// 	for (elem=os->aux_destinations;elem!=NULL;elem=elem->next){
+// 		OrtpAddress *addr=(OrtpAddress*)elem->data;
+// 		ortp_free(addr);
+// 	}
+// 	os->aux_destinations=o_list_free(os->aux_destinations);
+// }
 
 static void ortp_stream_uninit(OrtpStream *os){
 	msgb_allocator_uninit(&os->allocator);
-	ortp_stream_clear_aux_addresses(os);
+	// ortp_stream_clear_aux_addresses(os);
 }
 
 void rtp_session_uninit (RtpSession * session)
