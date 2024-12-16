@@ -40,7 +40,7 @@ set(ORTP_SO_VERSION "11") # incremented on January, the 20th 2015. DO NOT INCREM
 
 option(ENABLE_STATIC "Build static library (default is shared library)." NO)
 option(ENABLE_DOC "Enable documentation generation with Doxygen." YES)
-option(ENABLE_NTP_TIMESTAMP "Turn on NTP timestamping on packet reception." NO)
+option(ENABLE_NTP_TIMESTAMP "Turn on NTP timestamping on packet reception." YES)
 option(ENABLE_PERF "Disable costly features to reduce cpu consumtion and increase performance." NO)
 option(ENABLE_STRICT "Build with strict compile options." YES)
 option(ENABLE_TESTS "Enable compilation of test programs." NO)
