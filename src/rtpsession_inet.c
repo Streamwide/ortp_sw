@@ -958,6 +958,16 @@ int rtp_session_set_remote_addr_and_port(RtpSession * session, const char * addr
 	return rtp_session_set_remote_addr_full(session,addr,rtp_port,addr,rtcp_port);
 }
 
+bool_t
+rtp_session_is_rtp_remote_addr_set(const RtpSession *session) {
+	return session->rtp.gs.rem_addrlen;
+}
+
+bool_t
+rtp_session_is_rtcp_remote_addr_set(const RtpSession *session) {
+	return session->rtcp_mux ? session->rtp.gs.rem_addrlen : session->rtcp.gs.rem_addrlen;
+}
+
 /**
  *rtp_session_add_remote_aux_addr_full:
  *@param session:		a rtp session freshly created.

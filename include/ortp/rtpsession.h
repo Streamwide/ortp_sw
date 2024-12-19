@@ -285,7 +285,7 @@ typedef struct _OrtpStream {
 	unsigned int recv_bytes; /* used for bandwidth estimation */
 	float upload_bw;
 	float download_bw;
-	// OList *aux_destinations; /*list of OrtpAddress */
+	OList *aux_destinations; /*list of OrtpAddress */
 	msgb_allocator_t allocator;
 } OrtpStream;
 
@@ -467,6 +467,8 @@ rtp_session_set_remote_addr_full (RtpSession * session, const char * rtp_addr, i
 /*same as previous function, old name:*/
 ORTP_PUBLIC int rtp_session_set_remote_addr_and_port (RtpSession * session, const char * addr, int rtp_port, int rtcp_port);
 ORTP_PUBLIC int rtp_session_set_remote_addr(RtpSession *session,const char *addr, int port);
+ORTP_PUBLIC bool_t rtp_session_is_rtp_remote_addr_set(const RtpSession *session);
+ORTP_PUBLIC bool_t rtp_session_is_rtcp_remote_addr_set(const RtpSession *session);
 // ORTP_PUBLIC int rtp_session_add_aux_remote_addr_full(RtpSession * session, const char * rtp_addr, int rtp_port, const char * rtcp_addr, int rtcp_port);
 // ORTP_PUBLIC void rtp_session_clear_aux_remote_addr(RtpSession * session);
 /* alternatively to the set_remote_addr() and set_local_addr(), an application can give
@@ -570,7 +572,7 @@ ORTP_PUBLIC void rtp_session_send_rtcp_APP(RtpSession *session, uint8_t subtype,
  **/
 
 ORTP_PUBLIC	int rtp_session_rtcp_sendm_raw(RtpSession * session, mblk_t * m);
-	
+
 
 ORTP_PUBLIC uint32_t rtp_session_get_current_send_ts(RtpSession *session);
 ORTP_PUBLIC uint32_t rtp_session_get_current_recv_ts(RtpSession *session);
@@ -696,9 +698,9 @@ ORTP_PUBLIC void meta_rtp_transport_append_modifier(RtpTransport *tp,RtpTranspor
  * @return 0 if chaged was performed
  *
  */
-	
+
 ORTP_PUBLIC int rtp_session_update_remote_sock_addr(RtpSession * session, mblk_t * mp, bool_t is_rtp,bool_t only_at_start);
-	
+
 #ifdef __cplusplus
 }
 #endif
