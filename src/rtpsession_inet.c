@@ -1127,9 +1127,12 @@ static void update_recv_bytes(OrtpStream *os, int nbytes) {
 static void log_send_error(RtpSession *session, const char *type, mblk_t *m, struct sockaddr *destaddr, socklen_t destlen){
 	char host[65]={0};
 	char port[12]={0};
-	getnameinfo(destaddr,destlen,host,sizeof(host)-1,port,sizeof(port)-1,NI_NUMERICHOST|NI_NUMERICSERV);
-	ortp_warning ("RtpSession [%p] error sending [%s] packet [%p] to ip=[%s] port=[%s]: %s",
-		session, type, m, host, port, getSocketError());
+	int err = 0;
+	err = getnameinfo(destaddr,destlen,host,sizeof(host)-1,port,sizeof(port)-1,NI_NUMERICHOST|NI_NUMERICSERV);
+	if (err == 0) {
+		ortp_warning ("RtpSession [%p] error sending [%s] packet [%p] to ip=[%s] port=[%s]: %s",
+			session, type, m, host, port, getSocketError());
+	}
 }
 
 static int rtp_session_rtp_sendto(RtpSession * session, mblk_t * m, struct sockaddr *destaddr, socklen_t destlen, bool_t is_aux){
