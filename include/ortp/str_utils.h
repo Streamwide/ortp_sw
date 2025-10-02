@@ -40,6 +40,7 @@
 
 typedef struct ortp_recv_addr {
 	int family;
+	int ifindex;
 	union {
 		struct in_addr ipi_addr;
 		struct in6_addr ipi6_addr;
