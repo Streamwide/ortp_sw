@@ -22,8 +22,8 @@
 
 #define ORTP_MAJOR_VERSION 0
 #define ORTP_MINOR_VERSION 26
-#define ORTP_MICRO_VERSION 0
-#define ORTP_VERSION "0.26.0"
+#define ORTP_MICRO_VERSION 3
+#define ORTP_VERSION "0.26.3"
 
 #define HAVE_SYS_UIO_H 1
 /* #undef HAVE_SYS_AUDIO_H */
@@ -34,7 +34,7 @@
 
 /* #undef PERF */
 /* #undef ORTP_STATIC */
-/* #undef ORTP_TIMESTAMP */
+#define ORTP_TIMESTAMP
 /* #undef ORTP_DEBUG_MODE */
 /* #undef ORTP_DEFAULT_THREAD_STACK_SIZE */
 #define POSIXTIMER_INTERVAL 10000
